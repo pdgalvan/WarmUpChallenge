@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WarmUpChallenge.Data;
 using WarmUpChallenge.Models;
-
+using System.IO;
 namespace WarmUpChallenge.Controllers
 {
     public class PostController : Controller
@@ -63,19 +63,27 @@ namespace WarmUpChallenge.Controllers
         // POST: Post/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Post post)
+        public async Task<IActionResult> Create(PostVm postVm)
         {
             
             if (ModelState.IsValid)
             {
-                
+                var fileName = Path.Combine(_enviroment.ContentRootPath,
+                    "Uploads", postVm.Title);
 
-                post.PostId = Guid.NewGuid();
+                await postVm.Image.CopyToAsync(new FileStream(fileName, FileMode.Create));
+                
+                Post post = new Post();
+                post.Title = postVm.Title;
+                post.Content = postVm.Content;
+                post.CreationDate = postVm.CreationDate;
+                post.Category = _context.Categories.FirstOrDefault(c => c.CategoryId == postVm.CategoryId);
+
                 _context.Add(post);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(post);
+            return View(postVm);
         }
 
         // GET: Post/Edit/5
