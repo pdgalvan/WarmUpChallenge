@@ -69,7 +69,7 @@ namespace WarmUpChallenge.Controllers
             if (ModelState.IsValid)
             {
                 var fileName = Path.Combine(_enviroment.ContentRootPath,
-                    "Uploads", postVm.Title);
+                    "Uploads", postVm.Image.FileName);
 
                 await postVm.Image.CopyToAsync(new FileStream(fileName, FileMode.Create));
                 
